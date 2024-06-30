@@ -6,6 +6,10 @@ import (
 	"text/template"
 )
 
+type ResBody struct {
+	Body string `json:"body"`
+}
+
 func healthzHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -34,10 +38,7 @@ func (apiCfg *apiConfig) resetNumOfReqsHandler(w http.ResponseWriter, r *http.Re
 	apiCfg.filserverHits = 0
 }
 
-func validateChirpHandler(w http.ResponseWriter, r *http.Request) {
-	type ResBody struct {
-		Body string `json:"body"`
-	}
+func (dbCfg *dbConfig) createChirpHandler(w http.ResponseWriter, r *http.Request) {
 	type SuccessRes struct {
 		Body string `json:"cleaned_body"`
 	}
@@ -57,7 +58,24 @@ func validateChirpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	nonProfaneMsg := removeProfanity(body.Body)
-	validRes := SuccessRes{Body: nonProfaneMsg}
 
-	respondWithJSON(w, 200, validRes)
+	chirp, err := dbCfg.DB.CreateChirp(nonProfaneMsg)
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	respondWithJSON(w, 201, chirp)
+}
+
+func (dbCfg *dbConfig) getChirpHandler(w http.ResponseWriter, r *http.Request) {
+	chirps, err := dbCfg.DB.GetChirps()
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	respondWithJSON(w, 200, chirps)
 }

@@ -9,17 +9,33 @@ type apiConfig struct {
 	filserverHits int
 }
 
+type dbConfig struct {
+	DB *DB
+}
+
 func main() {
 	const PORT = "8080"
 	mux := http.NewServeMux()
 
-	var apiCfg apiConfig
+	db, err := NewDB("db.json")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dbCfg := &dbConfig{
+		DB: db,
+	}
+	apiCfg := &apiConfig{
+		filserverHits: 0,
+	}
 
 	mux.Handle("/app/*", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(".")))))
 	mux.HandleFunc("GET /admin/metrics", apiCfg.numOfReqsHandler)
 	mux.HandleFunc("GET /api/healthz", healthzHandler)
 	mux.HandleFunc("GET /api/reset", apiCfg.resetNumOfReqsHandler)
-	mux.HandleFunc("POST /api/validate_chirp", validateChirpHandler)
+	mux.HandleFunc("GET /api/chirps", dbCfg.getChirpHandler)
+	mux.HandleFunc("POST /api/chirps", dbCfg.createChirpHandler)
 
 	server := &http.Server{
 		Addr:    ":" + PORT,
