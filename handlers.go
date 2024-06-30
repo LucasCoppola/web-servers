@@ -79,3 +79,20 @@ func (dbCfg *dbConfig) getChirpHandler(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, 200, chirps)
 }
+
+func (dbCfg *dbConfig) getSingleChirpHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	chirp, err := dbCfg.DB.GetSingleChirp(id)
+
+	if err != nil {
+		if err.Error() == "chirp not found" {
+			respondWithError(w, http.StatusNotFound, err.Error())
+			return
+		} else {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+
+	respondWithJSON(w, 200, chirp)
+}

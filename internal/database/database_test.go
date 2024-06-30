@@ -74,6 +74,38 @@ func TestGetChirps(t *testing.T) {
 	}
 }
 
+func TestGetSingleChirp(t *testing.T) {
+	db, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	_, err := db.CreateChirp("First Chirp")
+	if err != nil {
+		t.Fatalf("Failed to create chirp: %v", err)
+	}
+	_, err = db.CreateChirp("Second chirp")
+	if err != nil {
+		t.Fatalf("Failed to create chirp: %v", err)
+	}
+
+	chirp, err := db.GetSingleChirp("1")
+	if err != nil {
+		t.Fatalf("Failed to get chirp: %v", err)
+	}
+
+	if chirp.Body != "First Chirp" {
+		t.Errorf("Expected chirp body to be 'First chirp', got '%s'", chirp.Body)
+	}
+
+	if chirp.Id != 1 {
+		t.Errorf("Expected chirp id to be 1, got '%s'", chirp.Body)
+	}
+
+	errorChirp, err := db.GetSingleChirp("3")
+	if err == nil {
+		t.Errorf("Expected error 'chirp not found', got '%v'", errorChirp)
+	}
+}
+
 func TestLoadDB(t *testing.T) {
 	db, cleanup := setupTestDB(t)
 	defer cleanup()
