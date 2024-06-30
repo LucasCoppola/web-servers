@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/LucasCoppola/web-server/internal/database"
 	"log"
 	"net/http"
 )
@@ -10,14 +11,14 @@ type apiConfig struct {
 }
 
 type dbConfig struct {
-	DB *DB
+	DB *database.DB
 }
 
 func main() {
 	const PORT = "8080"
 	mux := http.NewServeMux()
 
-	db, err := NewDB("db.json")
+	db, err := database.NewDB("internal/database/db.json")
 
 	if err != nil {
 		log.Fatal(err)

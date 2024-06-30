@@ -1,24 +1,10 @@
-package main
+package database
 
 import (
 	"encoding/json"
 	"os"
 	"sync"
 )
-
-type Chirp struct {
-	Id   int    `json:"id"`
-	Body string `json:"body"`
-}
-
-type DB struct {
-	path string
-	mux  *sync.RWMutex
-}
-
-type DBStructure struct {
-	Chirps map[int]Chirp `json:"chirps"`
-}
 
 // NewDB creates a new database connection
 func NewDB(path string) (*DB, error) {
@@ -30,47 +16,6 @@ func NewDB(path string) (*DB, error) {
 	}
 
 	return db, nil
-}
-
-// CreateChirp creates a new chirp and saves it to disk
-func (db *DB) CreateChirp(body string) (Chirp, error) {
-	dbStructure, err := db.loadDB()
-
-	if err != nil {
-		return Chirp{}, err
-	}
-
-	newId := len(dbStructure.Chirps) + 1
-	chirp := Chirp{Id: newId, Body: body}
-
-	if dbStructure.Chirps == nil {
-		dbStructure.Chirps = make(map[int]Chirp)
-	}
-	dbStructure.Chirps[newId] = chirp
-
-	err = db.writeDB(dbStructure)
-	if err != nil {
-		return Chirp{}, err
-	}
-
-	return chirp, nil
-}
-
-// GetChirps returns all chirps in the database
-func (db *DB) GetChirps() ([]Chirp, error) {
-	data, err := db.loadDB()
-
-	if err != nil {
-		return []Chirp{}, err
-	}
-
-	var chirpsList []Chirp
-
-	for _, chirp := range data.Chirps {
-		chirpsList = append(chirpsList, Chirp{Id: chirp.Id, Body: chirp.Body})
-	}
-
-	return chirpsList, nil
 }
 
 // ensureDB creates a new database file if it doesn't exist
