@@ -89,10 +89,32 @@ func (dbCfg *dbConfig) getSingleChirpHandler(w http.ResponseWriter, r *http.Requ
 			respondWithError(w, http.StatusNotFound, err.Error())
 			return
 		} else {
-			respondWithError(w, http.StatusBadRequest, err.Error())
+			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	}
 
 	respondWithJSON(w, 200, chirp)
+}
+
+func (dbCfg *dbConfig) createUserHandler(w http.ResponseWriter, r *http.Request) {
+	type userBody struct {
+		Email string `json:"email"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var usrBody userBody
+	err := decoder.Decode(&usrBody)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	user, err := dbCfg.DB.CreateUser(usrBody.Email)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	respondWithJSON(w, 201, user)
 }
