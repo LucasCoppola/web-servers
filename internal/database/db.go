@@ -49,14 +49,14 @@ func (db *DB) loadDB() (DBStructure, error) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			// If the file doesn't exist, return an empty DBStructure
-			return DBStructure{Chirps: make(map[int]Chirp)}, nil
+			return DBStructure{Chirps: make(map[int]Chirp), Users: make(map[int]User)}, nil
 		}
 		return DBStructure{}, err
 	}
 
 	if len(data) == 0 {
 		// If the file is empty, return an empty DBStructure
-		return DBStructure{Chirps: make(map[int]Chirp)}, nil
+		return DBStructure{Chirps: make(map[int]Chirp), Users: make(map[int]User)}, nil
 	}
 
 	var dbStructure DBStructure
@@ -67,6 +67,10 @@ func (db *DB) loadDB() (DBStructure, error) {
 
 	if dbStructure.Chirps == nil {
 		dbStructure.Chirps = make(map[int]Chirp)
+	}
+
+	if dbStructure.Users == nil {
+		dbStructure.Users = make(map[int]User)
 	}
 
 	return dbStructure, nil
