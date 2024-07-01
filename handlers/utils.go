@@ -1,8 +1,6 @@
-package main
+package handlers
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -38,12 +36,4 @@ func removeProfanity(msg string) string {
 	}
 
 	return strings.Join(words, " ")
-}
-
-func generateRandomID() (string, error) {
-	bytes := make([]byte, 16)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
 }
