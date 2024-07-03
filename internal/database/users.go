@@ -85,20 +85,3 @@ func (db *DB) FindUserByEmail(email string) (User, bool, error) {
 
 	return User{}, false, nil
 }
-
-func (db *DB) StoreToken(userId int, token string) error {
-	dbStructure, err := db.loadDB()
-	if err != nil {
-		return err
-	}
-
-	user, exists := dbStructure.Users[userId]
-	if !exists {
-		return errors.New("User not found")
-	}
-
-	user.Token = token
-	dbStructure.Users[userId] = user
-
-	return db.writeDB(dbStructure)
-}

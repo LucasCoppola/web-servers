@@ -146,20 +146,13 @@ func (dbCfg *DBConfig) LoginHandler(w http.ResponseWriter, r *http.Request, JWTS
 	userResponse := UserResponse{Id: userFound.Id, Email: userFound.Email}
 
 	var exp_in_secs int
-	if usrBody.Expires_in_seconds == 0 {
+	if usrBody.Expires_in_seconds == 0 || usrBody.Expires_in_seconds > 86400 {
 		exp_in_secs = 86400 // 24 hours in seconds
 	} else {
 		exp_in_secs = usrBody.Expires_in_seconds
 	}
 
 	token, err := CreateJWT(exp_in_secs, userResponse.Id, JWTSecret)
-
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	err = dbCfg.DB.StoreToken(userFound.Id, token)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
