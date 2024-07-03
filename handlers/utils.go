@@ -3,7 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func respondWithError(w http.ResponseWriter, code int, msg string) {
@@ -36,4 +40,22 @@ func removeProfanity(msg string) string {
 	}
 
 	return strings.Join(words, " ")
+}
+
+func CreateJWT(exp_in_secs int, userId int, JWTSecret string) (string, error) {
+	claims := &jwt.RegisteredClaims{
+		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Duration(exp_in_secs) * time.Second)),
+		Issuer:    "chirpy",
+		Subject:   strconv.Itoa(userId),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedString, err := token.SignedString([]byte(JWTSecret))
+
+	if err != nil {
+		return "", err
+	}
+
+	return signedString, nil
 }

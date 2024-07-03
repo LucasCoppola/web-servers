@@ -7,6 +7,7 @@ import (
 )
 
 type ApiConfig struct {
+	JWTSecret      string
 	FileServerHits int
 }
 

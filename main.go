@@ -3,13 +3,21 @@ package main
 import (
 	"github.com/LucasCoppola/web-server/handlers"
 	"github.com/LucasCoppola/web-server/internal/database"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 	const PORT = "8080"
 	mux := http.NewServeMux()
+
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	db, err := database.NewDB("internal/database/db.json")
 
@@ -21,7 +29,10 @@ func main() {
 		DB: db,
 	}
 
+	jwtSecret := os.Getenv("JWT_SECRET")
+
 	apiCfg := &handlers.ApiConfig{
+		JWTSecret:      jwtSecret,
 		FileServerHits: 0,
 	}
 
@@ -35,7 +46,13 @@ func main() {
 	mux.HandleFunc("GET /api/chirps/{id}", dbCfg.GetSingleChirpHandler)
 
 	mux.HandleFunc("POST /api/users", dbCfg.CreateUserHandler)
-	mux.HandleFunc("POST /api/login", dbCfg.LoginUserHandler)
+	mux.HandleFunc("PUT /api/users", func(w http.ResponseWriter, r *http.Request) {
+		dbCfg.UpdateUserHandler(w, r, apiCfg.JWTSecret)
+	})
+
+	mux.HandleFunc("POST /api/login", func(w http.ResponseWriter, r *http.Request) {
+		dbCfg.LoginHandler(w, r, apiCfg.JWTSecret)
+	})
 
 	server := &http.Server{
 		Addr:    ":" + PORT,
