@@ -69,3 +69,21 @@ func (dbCfg *DBConfig) GetSingleChirpHandler(w http.ResponseWriter, r *http.Requ
 
 	respondWithJSON(w, 200, chirp)
 }
+
+func (dbCfg *DBConfig) DeleteChirpHandler(w http.ResponseWriter, r *http.Request, JWTSecret string) {
+	isAuthenticated, userId := dbCfg.isAuthenticated(w, r, JWTSecret)
+
+	if !isAuthenticated {
+		return
+	}
+
+	id := r.PathValue("id")
+
+	code, err := dbCfg.DB.DeleteChirp(id, userId)
+	if err != nil {
+		respondWithError(w, code, err.Error())
+		return
+	}
+
+	w.WriteHeader(code)
+}

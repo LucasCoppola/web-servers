@@ -19,10 +19,9 @@ type UserBody struct {
 }
 
 type UserResponse struct {
-	Id           int    `json:"id"`
-	Email        string `json:"email"`
-	Token        string `json:"token"`
-	RefreshToken string `json:"refresh_token"`
+	Id    int    `json:"id"`
+	Email string `json:"email"`
+	Token string `json:"token"`
 }
 
 type ResBody struct {

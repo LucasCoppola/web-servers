@@ -73,3 +73,31 @@ func (db *DB) GetSingleChirp(id string) (Chirp, error) {
 
 	return chirp, nil
 }
+
+func (db *DB) DeleteChirp(id string, userId int) (int, error) {
+	dbStructure, err := db.loadDB()
+
+	if err != nil {
+		return 500, err
+	}
+
+	parsedId, err := strconv.Atoi(id)
+
+	if err != nil {
+		return 500, err
+	}
+
+	chirp, ok := dbStructure.Chirps[parsedId]
+
+	if !ok {
+		return 404, errors.New("chirp not found")
+	}
+
+	if chirp.AuthorId != userId {
+		return 403, errors.New("You're not the author of the chirp")
+	}
+
+	delete(dbStructure.Chirps, parsedId)
+
+	return 204, nil
+}

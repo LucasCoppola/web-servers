@@ -55,6 +55,9 @@ func main() {
 		dbCfg.CreateChirpHandler(w, r, apiCfg.JWTSecret)
 	})
 	mux.HandleFunc("GET /api/chirps/{id}", dbCfg.GetSingleChirpHandler)
+	mux.HandleFunc("DELETE /api/chirps/{id}", func(w http.ResponseWriter, r *http.Request) {
+		dbCfg.DeleteChirpHandler(w, r, apiCfg.JWTSecret)
+	})
 
 	mux.HandleFunc("POST /api/users", dbCfg.CreateUserHandler)
 	mux.HandleFunc("PUT /api/users", func(w http.ResponseWriter, r *http.Request) {

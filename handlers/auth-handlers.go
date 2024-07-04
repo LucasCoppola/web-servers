@@ -65,8 +65,6 @@ func (dbCfg *DBConfig) LoginHandler(w http.ResponseWriter, r *http.Request, JWTS
 		return
 	}
 
-	userResponse.RefreshToken = refreshToken
-
 	respondWithJSON(w, 200, userResponse)
 }
 
