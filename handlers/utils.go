@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -8,6 +10,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+)
+
+const (
+	HOUR_IN_SECS = 3600
 )
 
 func respondWithError(w http.ResponseWriter, code int, msg string) {
@@ -42,10 +48,10 @@ func removeProfanity(msg string) string {
 	return strings.Join(words, " ")
 }
 
-func CreateJWT(exp_in_secs int, userId int, JWTSecret string) (string, error) {
+func CreateJWT(userId int, JWTSecret string) (string, error) {
 	claims := &jwt.RegisteredClaims{
 		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Duration(exp_in_secs) * time.Second)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Duration(HOUR_IN_SECS) * time.Second)),
 		Issuer:    "chirpy",
 		Subject:   strconv.Itoa(userId),
 	}
@@ -58,4 +64,12 @@ func CreateJWT(exp_in_secs int, userId int, JWTSecret string) (string, error) {
 	}
 
 	return signedString, nil
+}
+
+func generateRandomString() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
 }

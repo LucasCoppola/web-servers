@@ -1,19 +1,9 @@
 package handlers
 
 import (
-	"github.com/LucasCoppola/web-server/internal/database"
 	"net/http"
 	"text/template"
 )
-
-type ApiConfig struct {
-	JWTSecret      string
-	FileServerHits int
-}
-
-type DBConfig struct {
-	DB *database.DB
-}
 
 func HealthzHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")

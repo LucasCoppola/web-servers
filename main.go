@@ -53,6 +53,12 @@ func main() {
 	mux.HandleFunc("POST /api/login", func(w http.ResponseWriter, r *http.Request) {
 		dbCfg.LoginHandler(w, r, apiCfg.JWTSecret)
 	})
+	mux.HandleFunc("POST /api/refresh", func(w http.ResponseWriter, r *http.Request) {
+		dbCfg.RefreshTokenHandler(w, r, apiCfg.JWTSecret)
+	})
+	mux.HandleFunc("POST /api/revoke", func(w http.ResponseWriter, r *http.Request) {
+		dbCfg.RevokeTokenHandler(w, r, apiCfg.JWTSecret)
+	})
 
 	server := &http.Server{
 		Addr:    ":" + PORT,
