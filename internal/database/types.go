@@ -16,11 +16,13 @@ type User struct {
 	Password              string `json:"password"`
 	RefreshToken          string `json:"refresh_token"`
 	RefreshTokenExpiresAt int64  `json:"refresh_token_expires_at"`
+	IsChirpyRed           bool   `json:"is_chirpy_red"`
 }
 
 type UserResponse struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
+	Id          int    `json:"id"`
+	Email       string `json:"email"`
+	IsChirpyRed bool   `json:"is_chirpy_red"`
 }
 
 type DB struct {

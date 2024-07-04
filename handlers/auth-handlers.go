@@ -38,7 +38,7 @@ func (dbCfg *DBConfig) LoginHandler(w http.ResponseWriter, r *http.Request, JWTS
 		return
 	}
 
-	userResponse := UserResponse{Id: userFound.Id, Email: userFound.Email}
+	userResponse := UserResponse{Id: userFound.Id, Email: userFound.Email, IsChirpyRed: userFound.IsChirpyRed}
 
 	token, err := CreateJWT(userResponse.Id, JWTSecret)
 

@@ -9,16 +9,7 @@ import (
 	"os"
 )
 
-func deleteDBFile() {
-	err := os.Remove("db.json")
-	if err != nil && !os.IsNotExist(err) {
-		log.Fatalf("Failed to delete db.json: %v", err)
-	}
-}
-
 func main() {
-	deleteDBFile()
-
 	const PORT = "8080"
 	mux := http.NewServeMux()
 
@@ -39,9 +30,11 @@ func main() {
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
+	polkaApiKey := os.Getenv("POLKA_API_KEY")
 
 	apiCfg := &handlers.ApiConfig{
 		JWTSecret:      jwtSecret,
+		PolkaApiKey:    polkaApiKey,
 		FileServerHits: 0,
 	}
 
@@ -72,6 +65,10 @@ func main() {
 	})
 	mux.HandleFunc("POST /api/revoke", func(w http.ResponseWriter, r *http.Request) {
 		dbCfg.RevokeTokenHandler(w, r, apiCfg.JWTSecret)
+	})
+
+	mux.HandleFunc("POST /api/polka/webhooks", func(w http.ResponseWriter, r *http.Request) {
+		dbCfg.WebhookHandler(w, r, apiCfg.PolkaApiKey)
 	})
 
 	server := &http.Server{

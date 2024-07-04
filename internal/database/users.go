@@ -12,7 +12,7 @@ func (db *DB) CreateUser(email string, hashedPassword []byte) (UserResponse, err
 	}
 
 	newId := len(dbStructure.Users) + 1
-	user := User{Id: newId, Email: email, Password: string(hashedPassword)}
+	user := User{Id: newId, Email: email, Password: string(hashedPassword), IsChirpyRed: false}
 
 	if dbStructure.Users == nil {
 		dbStructure.Users = make(map[int]User)
@@ -24,7 +24,7 @@ func (db *DB) CreateUser(email string, hashedPassword []byte) (UserResponse, err
 		return UserResponse{}, err
 	}
 
-	return UserResponse{Id: user.Id, Email: user.Email}, nil
+	return UserResponse{Id: user.Id, Email: user.Email, IsChirpyRed: false}, nil
 }
 
 func (db *DB) UpdateUser(userId int, email string, hashedPassword []byte) (UserResponse, error) {
@@ -84,4 +84,34 @@ func (db *DB) FindUserByEmail(email string) (User, bool, error) {
 	}
 
 	return User{}, false, nil
+}
+
+func (db *DB) UpgradeUser(userId int) (int, error) {
+	dbStructure, err := db.loadDB()
+
+	if err != nil {
+		return 500, err
+	}
+
+	user, exists, err := db.FindUserById(userId)
+
+	if err != nil {
+		return 500, err
+	}
+
+	if !exists {
+		return 404, errors.New("User not found")
+	}
+
+	user.IsChirpyRed = true
+
+	dbStructure.Users[user.Id] = user
+
+	err = db.writeDB(dbStructure)
+
+	if err != nil {
+		return 500, err
+	}
+
+	return 204, nil
 }
