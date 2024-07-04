@@ -73,3 +73,33 @@ func generateRandomString() (string, error) {
 	}
 	return hex.EncodeToString(bytes), nil
 }
+
+func (dbCfg *DBConfig) isAuthenticated(w http.ResponseWriter, r *http.Request, JWTSecret string) (bool, int) {
+	bearerToken := r.Header.Get("Authorization")
+	jwtToken := strings.TrimPrefix(bearerToken, "Bearer ")
+
+	claims := &jwt.RegisteredClaims{}
+
+	token, err := jwt.ParseWithClaims(jwtToken, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(JWTSecret), nil
+	})
+
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, err.Error())
+		return false, 0
+	}
+
+	if !token.Valid {
+		respondWithError(w, http.StatusUnauthorized, "Invalid token")
+		return false, 0
+	}
+
+	userId, err := strconv.Atoi(claims.Subject)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Invalid user ID format")
+		return false, 0
+	}
+
+	return true, userId
+}

@@ -9,7 +9,16 @@ import (
 	"os"
 )
 
+func deleteDBFile() {
+	err := os.Remove("db.json")
+	if err != nil && !os.IsNotExist(err) {
+		log.Fatalf("Failed to delete db.json: %v", err)
+	}
+}
+
 func main() {
+	deleteDBFile()
+
 	const PORT = "8080"
 	mux := http.NewServeMux()
 
@@ -42,7 +51,9 @@ func main() {
 	mux.HandleFunc("GET /api/reset", apiCfg.ResetNumOfReqsHandler)
 
 	mux.HandleFunc("GET /api/chirps", dbCfg.GetChirpHandler)
-	mux.HandleFunc("POST /api/chirps", dbCfg.CreateChirpHandler)
+	mux.HandleFunc("POST /api/chirps", func(w http.ResponseWriter, r *http.Request) {
+		dbCfg.CreateChirpHandler(w, r, apiCfg.JWTSecret)
+	})
 	mux.HandleFunc("GET /api/chirps/{id}", dbCfg.GetSingleChirpHandler)
 
 	mux.HandleFunc("POST /api/users", dbCfg.CreateUserHandler)

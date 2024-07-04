@@ -5,8 +5,9 @@ import (
 )
 
 type Chirp struct {
-	Id   int    `json:"id"`
-	Body string `json:"body"`
+	Id       int    `json:"id"`
+	AuthorId int    `json:"author_id"`
+	Body     string `json:"body"`
 }
 
 type User struct {

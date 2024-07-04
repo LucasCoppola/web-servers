@@ -7,7 +7,7 @@ import (
 )
 
 // CreateChirp creates a new chirp and saves it to disk
-func (db *DB) CreateChirp(body string) (Chirp, error) {
+func (db *DB) CreateChirp(body string, userId int) (Chirp, error) {
 	dbStructure, err := db.loadDB()
 
 	if err != nil {
@@ -15,7 +15,7 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 	}
 
 	newId := len(dbStructure.Chirps) + 1
-	chirp := Chirp{Id: newId, Body: body}
+	chirp := Chirp{Id: newId, Body: body, AuthorId: userId}
 
 	if dbStructure.Chirps == nil {
 		dbStructure.Chirps = make(map[int]Chirp)
@@ -32,7 +32,7 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 
 // GetChirps returns all chirps in the database
 func (db *DB) GetChirps() ([]Chirp, error) {
-	data, err := db.loadDB()
+	dbStructure, err := db.loadDB()
 
 	if err != nil {
 		return []Chirp{}, err
@@ -40,8 +40,8 @@ func (db *DB) GetChirps() ([]Chirp, error) {
 
 	var chirpsList []Chirp
 
-	for _, chirp := range data.Chirps {
-		chirpsList = append(chirpsList, Chirp{Id: chirp.Id, Body: chirp.Body})
+	for _, chirp := range dbStructure.Chirps {
+		chirpsList = append(chirpsList, Chirp{Id: chirp.Id, Body: chirp.Body, AuthorId: chirp.AuthorId})
 	}
 
 	sort.Slice(chirpsList, func(i, j int) bool {

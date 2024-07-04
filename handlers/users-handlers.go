@@ -3,10 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
-	"strings"
 
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -59,29 +56,9 @@ func (dbCfg *DBConfig) UpdateUserHandler(w http.ResponseWriter, r *http.Request,
 		return
 	}
 
-	bearerToken := r.Header.Get("Authorization")
-	jwtToken := strings.TrimPrefix(bearerToken, "Bearer ")
+	isAuthenticated, userId := dbCfg.isAuthenticated(w, r, JWTSecret)
 
-	claims := &jwt.RegisteredClaims{}
-
-	token, err := jwt.ParseWithClaims(jwtToken, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(JWTSecret), nil
-	})
-
-	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	if !token.Valid {
-		respondWithError(w, http.StatusUnauthorized, "Invalid token")
-		return
-	}
-
-	userId, err := strconv.Atoi(claims.Subject)
-
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Invalid user ID format")
+	if !isAuthenticated {
 		return
 	}
 

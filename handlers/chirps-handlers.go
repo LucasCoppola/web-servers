@@ -5,9 +5,15 @@ import (
 	"net/http"
 )
 
-func (dbCfg *DBConfig) CreateChirpHandler(w http.ResponseWriter, r *http.Request) {
+func (dbCfg *DBConfig) CreateChirpHandler(w http.ResponseWriter, r *http.Request, JWTSecret string) {
 	type SuccessRes struct {
 		Body string `json:"cleaned_body"`
+	}
+
+	isAuthenticated, userId := dbCfg.isAuthenticated(w, r, JWTSecret)
+
+	if !isAuthenticated {
+		return
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -26,7 +32,7 @@ func (dbCfg *DBConfig) CreateChirpHandler(w http.ResponseWriter, r *http.Request
 
 	nonProfaneMsg := removeProfanity(body.Body)
 
-	chirp, err := dbCfg.DB.CreateChirp(nonProfaneMsg)
+	chirp, err := dbCfg.DB.CreateChirp(nonProfaneMsg, userId)
 
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
