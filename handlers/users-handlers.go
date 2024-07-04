@@ -10,18 +10,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserBody struct {
-	Email              string `json:"email"`
-	Password           string `json:"password"`
-	Expires_in_seconds int    `json:"expires_in_seconds"`
-}
-
-type UserResponse struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
-	Token string `json:"token"`
-}
-
 func (dbCfg *DBConfig) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var usrBody UserBody
@@ -112,54 +100,4 @@ func (dbCfg *DBConfig) UpdateUserHandler(w http.ResponseWriter, r *http.Request,
 	}
 
 	respondWithJSON(w, 200, user)
-}
-
-func (dbCfg *DBConfig) LoginHandler(w http.ResponseWriter, r *http.Request, JWTSecret string) {
-	decoder := json.NewDecoder(r.Body)
-	var usrBody UserBody
-	err := decoder.Decode(&usrBody)
-
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	userFound, exists, err := dbCfg.DB.FindUserByEmail(usrBody.Email)
-
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if !exists {
-		respondWithError(w, http.StatusBadRequest, "User doesn't exists")
-		return
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(userFound.Password), []byte(usrBody.Password))
-
-	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "User doesn't exists")
-		return
-	}
-
-	userResponse := UserResponse{Id: userFound.Id, Email: userFound.Email}
-
-	var exp_in_secs int
-	if usrBody.Expires_in_seconds == 0 || usrBody.Expires_in_seconds > 86400 {
-		exp_in_secs = 86400 // 24 hours in seconds
-	} else {
-		exp_in_secs = usrBody.Expires_in_seconds
-	}
-
-	token, err := CreateJWT(exp_in_secs, userResponse.Id, JWTSecret)
-
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	userResponse.Token = token
-
-	respondWithJSON(w, 200, userResponse)
 }

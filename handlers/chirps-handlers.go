@@ -5,10 +5,6 @@ import (
 	"net/http"
 )
 
-type ResBody struct {
-	Body string `json:"body"`
-}
-
 func (dbCfg *DBConfig) CreateChirpHandler(w http.ResponseWriter, r *http.Request) {
 	type SuccessRes struct {
 		Body string `json:"cleaned_body"`
