@@ -43,7 +43,8 @@ func (dbCfg *DBConfig) CreateChirpHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (dbCfg *DBConfig) GetChirpHandler(w http.ResponseWriter, r *http.Request) {
-	chirps, err := dbCfg.DB.GetChirps()
+	authorId := r.URL.Query().Get("author_id")
+	chirps, err := dbCfg.DB.GetChirps(authorId)
 
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())

@@ -31,7 +31,7 @@ func (db *DB) CreateChirp(body string, userId int) (Chirp, error) {
 }
 
 // GetChirps returns all chirps in the database
-func (db *DB) GetChirps() ([]Chirp, error) {
+func (db *DB) GetChirps(authorId string) ([]Chirp, error) {
 	dbStructure, err := db.loadDB()
 
 	if err != nil {
@@ -40,8 +40,20 @@ func (db *DB) GetChirps() ([]Chirp, error) {
 
 	var chirpsList []Chirp
 
-	for _, chirp := range dbStructure.Chirps {
-		chirpsList = append(chirpsList, Chirp{Id: chirp.Id, Body: chirp.Body, AuthorId: chirp.AuthorId})
+	if authorId == "" {
+		for _, chirp := range dbStructure.Chirps {
+			chirpsList = append(chirpsList, chirp)
+		}
+	} else {
+		authorIdInt, err := strconv.Atoi(authorId)
+		if err != nil {
+			return nil, err
+		}
+		for _, chirp := range dbStructure.Chirps {
+			if chirp.AuthorId == authorIdInt {
+				chirpsList = append(chirpsList, chirp)
+			}
+		}
 	}
 
 	sort.Slice(chirpsList, func(i, j int) bool {
