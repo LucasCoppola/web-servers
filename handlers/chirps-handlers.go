@@ -44,7 +44,8 @@ func (dbCfg *DBConfig) CreateChirpHandler(w http.ResponseWriter, r *http.Request
 
 func (dbCfg *DBConfig) GetChirpHandler(w http.ResponseWriter, r *http.Request) {
 	authorId := r.URL.Query().Get("author_id")
-	chirps, err := dbCfg.DB.GetChirps(authorId)
+	sort := r.URL.Query().Get("sort")
+	chirps, err := dbCfg.DB.GetChirps(authorId, sort)
 
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
